@@ -5,25 +5,23 @@ import { Dialog } from '@headlessui/react'
 // import { Link } from 'react-router-dom';
 
 function Books() {
-  // Books schema:
-  // title: {
-  // type: String,
-  //   default: 'Unknown',
-  // },
-  // publishingYear: Number,
-  // genres: [String],
-  // authors: [Types.ObjectId],
-  // quantity: Number,
-  // price: Number,
-  
-  const [books, setBooks] = useState([]);
   let [isOpen, setIsOpen] = useState(false);
-  let [nameInputRef, countryInputRef] = [useRef(null), useRef(null)];
+  const [books, setBooks] = useState([]);
+  const [authors, setAuthors] = useState([]);
+
+  const [
+    bookNameRef,
+    publishingYearRef,
+    genresRef,
+    authorRef,
+    quantityRef,
+    priceRef
+    ] = [ useRef(null), useRef(null), useRef(null), useRef(null), useRef(null), useRef(null)]
   
   useEffect(() => {
     async function fetchBooks() {
       try {
-        const endpoint = 'http://127.0.0.1:3000/api/books';
+        const endpoint = 'http://10.12.6.8:3000/api/books';
         const response = await fetch(endpoint);
         const booksData = await response.json();
         setBooks(booksData);
@@ -31,10 +29,53 @@ function Books() {
         console.error("Error fetching books:", error);
       }
     }
+    async function fetchAuthors() {
+      try {
+        const endpoint = 'http://10.12.6.8:3000/api/authors';
+        const response = await fetch(endpoint);
+        const authorsData = await response.json();
+        setAuthors(authorsData);
+      } catch (error) {
+        console.error("Error fetching authors:", error);
+      }
+    }
+  
+  fetchAuthors();
   fetchBooks();
+  
   }, []);
   
-  console.log("books:", books);
+  const addBook = async () => {
+    try {
+      let bookToAdd = {
+        "title": bookNameRef.current.value,
+        "publishingYear": publishingYearRef.current.value,
+        "genres": genresRef.current.value.split(' '),
+        "authors": authorRef.current.value.split(' '),
+        "quantity": quantityRef.current.value,
+        "price": priceRef.current.value
+      }
+      let body = {
+        booksList: [
+          bookToAdd
+        ]
+      }
+      const endpoint = 'http://10.12.6.8:3000/api/books/add';
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+      });
+      const data = await response.json();
+      console.log("data:", data);
+      setBooks([...books, bookToAdd]);
+      setIsOpen(false);
+    } catch (error) {
+      console.error("Error adding book:", error);
+    }
+  }
   
   return (
     <>
@@ -53,21 +94,39 @@ function Books() {
               <Dialog.Title><b className="text-xl">Add new Author</b></Dialog.Title>
               <div className="p-2">
                 <div className="py-4 flex flex-col space-y-4">
-                  {/*  */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Author name</label>
-                    <input ref={nameInputRef} type="text" placeholder="Name" className="w-full border border-black rounded p-2 px-4 bg-transparent" />     
+                    <label className="block text-sm font-medium text-gray-700">Book name</label>
+                    <input ref={bookNameRef} type="text" placeholder="Name" className="w-full border border-black rounded p-2 px-4 bg-transparent" />     
                   </div>
-                  {/*  */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Country</label>
-                    <input ref={countryInputRef} type="text" placeholder="Country" className="w-full border border-black rounded p-2 px-4 bg-transparent" />
+                    <label className="block text-sm font-medium text-gray-700">Publishing Year</label>
+                    <input ref={publishingYearRef} type="text" placeholder="1917" className="w-full border border-black rounded p-2 px-4 bg-transparent" />
                   </div>
-                  {/*  */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Genres <span className="text-xs">(separate by space)</span></label>
+                    <input ref={genresRef} type="text" placeholder="Fiction Drama Anything" className="w-full border border-black rounded p-2 px-4 bg-transparent" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Author</label>
+                    <select defaultValue={"0"} ref={authorRef} type="text" className="w-full border border-black rounded p-2 bg-transparent cursor-pointer">
+                      <option defaultValue={"0"} disabled value="0">Select an author</option>
+                      {authors.map((author, index) => {
+                        return <option key={index} value={author._id}>{author.name}</option>
+                      })}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Quantity</label>
+                    <input ref={quantityRef} type="number" placeholder="10" className="w-full border border-black rounded p-2 px-4 bg-transparent" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Price</label>
+                    <input ref={priceRef} type="number" placeholder="137.17" className="w-full border border-black rounded p-2 px-4 bg-transparent" />
+                  </div>
                 </div>
               </div>
               <div className="flex space-x-6 justify-evenly p-2">
-                <button /*onClick={addAuthor} */ className="w-full border border-black text-white bg-black rounded p-2 px-4">Add</button>
+                <button onClick={addBook} className="w-full border border-black text-white bg-black rounded p-2 px-4">Add</button>
                 <button onClick={() => setIsOpen(false)} className="w-full border border-black text-black rounded p-2 px-4">Cancel</button>
               </div>
             </Dialog.Panel>
@@ -75,6 +134,7 @@ function Books() {
         </Dialog>
       </div>
       <div className="py-4"></div>
+      {books.length === 0 && <div className="text-lg font-thin">No books found!</div>}
       <div className="grid gap-8 md:grid-cols-3">
         {books.map((book, index) => (
           <div key={index} className="bg-white p-4 rounded-md border">
@@ -83,19 +143,35 @@ function Books() {
                 book.title
               }</span>
               <span className=""> - </span>
-              <span className="">1997</span>
+              <span className="">
+                {
+                  book.publishingYear
+                }
+              </span>
             </div>
             <div className="text-sm font-medium">
-              <b>Genres</b>: Fiction, Fantasy, Adventure
+              <b>Genres</b>: {
+                book.genres.join(', ')
+              }
             </div>
             <div className="text-sm font-medium">
-              <b>Authors</b>: Ahmed Sliman, John Doe
+              <b>Authors</b>: {
+                book.authors.map((authorId, index) => {
+                  const author = authors.find(author => author._id === authorId);
+                  return author.name;
+                }
+                ).join(', ')
+              }
             </div>
             <div className="text-sm font-medium">
-              <b>Quantity</b>: 342
+              <b>Quantity</b>: {
+                book.quantity
+              }
             </div>
             <div className="text-sm font-medium">
-              <b>Price</b>: 1024Dhs
+              <b>Price</b>: {
+                book.price
+              } $
             </div>
           </div>
         ))}

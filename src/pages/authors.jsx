@@ -13,7 +13,7 @@ function Authors() {
   useEffect(() => {
     async function fetchAuthors() {
       try {
-        const endpoint = 'http://127.0.0.1:3000/api/authors';
+        const endpoint = 'http://10.12.6.8:3000/api/authors';
         const response = await fetch(endpoint);
         const authorsData = await response.json();
         setAuthors(authorsData);
@@ -25,8 +25,6 @@ function Authors() {
     fetchAuthors();
   }, []);
   
-  console.log("authors:", authors);
-  
   const addAuthor = async () => {
     try {
       const name = nameInputRef.current.value;
@@ -37,15 +35,14 @@ function Authors() {
         return;
       }
       const query = `name=${name}&country=${country}`;
-      const endpoint = 'http://127.0.0.1:3000/api/authors/add?' + query;
-      const response = await fetch(endpoint, {
+      const endpoint = 'http://10.12.6.8:3000/api/authors/add?' + query;
+      const response = fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         }
       });
-      const data = await response.json();
-      console.log("data:", data);
+      const data = response.json();
       setAuthors([...authors, data]);
       setIsOpen(false);
     } catch (error) {

@@ -21,7 +21,7 @@ function Books() {
   useEffect(() => {
     async function fetchBooks() {
       try {
-        const endpoint = 'http://10.12.6.8:3000/api/books';
+        const endpoint = 'http://localhost:3000/api/books';
         const response = await fetch(endpoint);
         const booksData = await response.json();
         setBooks(booksData);
@@ -31,7 +31,7 @@ function Books() {
     }
     async function fetchAuthors() {
       try {
-        const endpoint = 'http://10.12.6.8:3000/api/authors';
+        const endpoint = 'http://localhost:3000/api/authors';
         const response = await fetch(endpoint);
         const authorsData = await response.json();
         setAuthors(authorsData);
@@ -60,7 +60,7 @@ function Books() {
           bookToAdd
         ]
       }
-      const endpoint = 'http://10.12.6.8:3000/api/books/add';
+      const endpoint = 'http://localhost:3000/api/books/add';
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
@@ -91,7 +91,7 @@ function Books() {
         >
           <div className="fixed inset-0 flex w-screen h-screen items-center justify-center md:p-4 bg-black bg-opacity-20 backdrop-blur-[6px]">
             <Dialog.Panel className="flex flex-col justify-center w-full h-full md:h-auto max-w-full md:max-w-md md:rounded-lg bg-white p-4 md:p-6 md:border border-black md:shadow-xl">
-              <Dialog.Title><b className="text-xl">Add new Author</b></Dialog.Title>
+              <Dialog.Title><b className="text-xl">Add new Book</b></Dialog.Title>
               <div className="p-2">
                 <div className="py-4 flex flex-col space-y-4">
                   <div>

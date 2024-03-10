@@ -4,7 +4,6 @@ import Sections from '../components/Sections.jsx'
 import { Dialog } from '@headlessui/react'
 import { Link } from 'react-router-dom';
 
-
 function Authors() {
   let [isOpen, setIsOpen] = useState(false);
   const [authors, setAuthors] = useState([]);
@@ -13,7 +12,7 @@ function Authors() {
   useEffect(() => {
     async function fetchAuthors() {
       try {
-        const endpoint = 'http://10.12.6.8:3000/api/authors';
+        const endpoint = 'http://localhost:3000/api/authors';
         const response = await fetch(endpoint);
         const authorsData = await response.json();
         setAuthors(authorsData);
@@ -35,14 +34,15 @@ function Authors() {
         return;
       }
       const query = `name=${name}&country=${country}`;
-      const endpoint = 'http://10.12.6.8:3000/api/authors/add?' + query;
-      const response = fetch(endpoint, {
+      const endpoint = 'http://localhost:3000/api/authors/add?' + query;
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         }
       });
-      const data = response.json();
+      const data = await response.json();
+      console.log("data:", data);
       setAuthors([...authors, data]);
       setIsOpen(false);
     } catch (error) {
